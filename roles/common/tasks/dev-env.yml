@@ -3,7 +3,6 @@
   apt:
     name: ""
     state: installed
-    update_cache: yes
   with_items:
     - python-pip
     - curl

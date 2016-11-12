@@ -1,0 +1,70 @@
+---
+- name: install dev dependencies
+  apt:
+    name: ""
+    state: installed
+    update_cache: yes
+  with_items:
+    - python-pip
+    - curl
+    - nodejs
+    - npm
+    - python-dev
+  sudo: yes
+
+- name: get currently installed node version
+  command: "node --version"
+  sudo: yes
+  register: result
+  ignore_errors: True
+  tags: nodejs
+
+- name: checkout node
+  git:
+    repo: "github.com/nodejs/node"
+    dest: "setup/node"
+    force: "no"
+    accept_hostkey: yes
+  when: result.rc !=0
+  tags: nodejs
+  sudo: yes
+- name: configure
+  sudo: yes
+  command: "./configure"
+  args:
+    chdir: /setup/node
+  when: result.rc !=0
+  tags: nodejs
+
+
+- name: make
+  command: "make"
+  sudo: yes
+  args:
+    chdir: /setup/node
+  when: result.rc !=0
+  tags: nodejs
+
+- name: make install
+  command: "make install"
+  sudo: yes
+  args:
+    chdir: /setup/node
+  when: result.rc !=0
+  tags: nodejs
+
+- name: install global nodejs packages
+  npm:
+    name: ""
+    state: present
+    global: yes
+    version: ""
+  with_items:
+    - {name: 'bower'}
+    - {name: 'coffee-script', version: '1.7.1'}
+    - {name: 'grunt-cli'}
+    - {name: 'less'}
+    - {name: 'jshint'}
+    - {name: 'coffee-jshint'}
+  sudo: yes
+
